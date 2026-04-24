@@ -1,6 +1,8 @@
+import 'package:equatable/equatable.dart';
+
 enum SatuanSuhu { celsius, fahrenheit, kelvin, reamur }
 
-class HasilKonversi {
+class HasilKonversi extends Equatable {
   final double celsius;
   final double fahrenheit;
   final double kelvin;
@@ -12,6 +14,9 @@ class HasilKonversi {
     required this.kelvin,
     required this.reamur,
   });
+
+  @override
+  List<Object> get props => [celsius, fahrenheit, kelvin, reamur];
 }
 
 class SuhuConverter {

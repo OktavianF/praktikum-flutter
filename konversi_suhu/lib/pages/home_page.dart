@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../bloc/konversi_suhu_bloc.dart';
+import '../bloc/konversi_suhu_event.dart';
+import '../bloc/konversi_suhu_state.dart';
 import '../models/suhu_converter.dart';
 import '../widgets/hasil_card.dart';
 
@@ -12,18 +16,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final TextEditingController _controller = TextEditingController();
-  SatuanSuhu _satuanInput = SatuanSuhu.celsius;
-  HasilKonversi? _hasil;
 
   void _konversi() {
-    if (_controller.text.isEmpty) return;
-
-    final input = double.tryParse(_controller.text);
-    if (input == null) return;
-
-    setState(() {
-      _hasil = SuhuConverter.konversi(input, _satuanInput);
-    });
+    context.read<KonversiSuhuBloc>().add(HitungKonversiSuhu(_controller.text));
   }
 
   @override
@@ -70,22 +65,33 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildDropdown() {
-    return DropdownButtonFormField<SatuanSuhu>(
-      initialValue: _satuanInput,
-      decoration: const InputDecoration(
-        labelText: 'Satuan Input',
-        border: OutlineInputBorder(),
-      ),
-      items: SatuanSuhu.values
-          .map((s) => DropdownMenuItem(
-                value: s,
-                child: Text(SuhuConverter.labels[s]!),
-              ))
-          .toList(),
-      onChanged: (value) {
-        if (value != null) {
-          setState(() => _satuanInput = value);
-        }
+    return BlocBuilder<KonversiSuhuBloc, KonversiSuhuState>(
+      buildWhen: (previous, current) =>
+          previous.satuanTerpilih != current.satuanTerpilih,
+      builder: (context, state) {
+        return InputDecorator(
+          decoration: const InputDecoration(
+            labelText: 'Satuan Input',
+            border: OutlineInputBorder(),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<SatuanSuhu>(
+              isDense: true,
+              value: state.satuanTerpilih,
+              items: SatuanSuhu.values
+                  .map((s) => DropdownMenuItem(
+                        value: s,
+                        child: Text(SuhuConverter.labels[s]!),
+                      ))
+                  .toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  context.read<KonversiSuhuBloc>().add(UbahSatuanSuhu(value));
+                }
+              },
+            ),
+          ),
+        );
       },
     );
   }
@@ -104,24 +110,39 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHasil() {
-    final hasil = _hasil;
-    if (hasil == null) {
-      return const Expanded(
-        child: Center(
-          child: Text('Masukkan suhu dan tekan Konversi'),
-        ),
-      );
-    }
+    return BlocBuilder<KonversiSuhuBloc, KonversiSuhuState>(
+      builder: (context, state) {
+        if (state.errorMessage.isNotEmpty) {
+          return Expanded(
+            child: Center(
+              child: Text(
+                state.errorMessage,
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
+          );
+        }
 
-    return Expanded(
-      child: ListView(
-        children: [
-          HasilCard(nama: 'Celsius (°C)', nilai: hasil.celsius),
-          HasilCard(nama: 'Fahrenheit (°F)', nilai: hasil.fahrenheit),
-          HasilCard(nama: 'Kelvin (K)', nilai: hasil.kelvin),
-          HasilCard(nama: 'Reamur (°R)', nilai: hasil.reamur),
-        ],
-      ),
+        final hasil = state.hasilKonversi;
+        if (hasil == null) {
+          return const Expanded(
+            child: Center(
+              child: Text('Masukkan suhu dan tekan Konversi'),
+            ),
+          );
+        }
+
+        return Expanded(
+          child: ListView(
+            children: [
+              HasilCard(nama: 'Celsius (°C)', nilai: hasil.celsius),
+              HasilCard(nama: 'Fahrenheit (°F)', nilai: hasil.fahrenheit),
+              HasilCard(nama: 'Kelvin (K)', nilai: hasil.kelvin),
+              HasilCard(nama: 'Reamur (°R)', nilai: hasil.reamur),
+            ],
+          ),
+        );
+      },
     );
   }
 }

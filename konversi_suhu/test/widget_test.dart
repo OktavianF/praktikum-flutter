@@ -83,8 +83,8 @@ void main() {
       await tester.tap(find.text('Konversi'));
       await tester.pump();
 
-      // Masih menampilkan placeholder, tidak crash
-      expect(find.text('Masukkan suhu dan tekan Konversi'), findsOneWidget);
+      // Sekarang menampilkan pesan error dari BLoC
+      expect(find.text('Input suhu tidak boleh kosong'), findsOneWidget);
     });
   });
 }

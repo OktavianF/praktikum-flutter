@@ -1,22 +1,27 @@
 # Laporan Praktikum Konversi Suhu
 
-
-
+Aplikasi Flutter sederhana untuk mengonversi suhu antara berbagai satuan (Celsius, Fahrenheit, Kelvin, dan Reamur). Proyek ini telah direfactor menggunakan arsitektur **Clean Code**, **BLoC State Management**, serta menerapkan **Unit, BLoC, dan Widget Tests** untuk menjamin kualitas aplikasi.
 
 ## Fitur Utama
 
 - Input suhu menggunakan `TextField`.
-- Pemilihan satuan input dengan `DropdownButtonFormField`.
-- Konversi ke Celsius, Fahrenheit, Kelvin, dan Reamur.
+- Pemilihan satuan input dengan `DropdownButton` yang reaktif.
+- Konversi secara bersamaan ke Celsius, Fahrenheit, Kelvin, dan Reamur.
+- Validasi input yang aman (pesan error untuk input kosong maupun format non-angka).
 - Tampilan hasil dalam kartu terpisah agar mudah dibaca.
+- **State Management BLoC** untuk performa _rebuild_ komponen UI yang lebih efisien.
 
-## Struktur Proyek
+## Struktur Proyek BLoC & Clean Architecture
 
-Struktur utama aplikasi:
+Struktur utama aplikasi disusun untuk pemisahan tanggung jawab (Separation of Concerns):
 
 ```text
 lib/
 ├── main.dart
+├── bloc/
+│   ├── konversi_suhu_bloc.dart
+│   ├── konversi_suhu_event.dart
+│   └── konversi_suhu_state.dart
 ├── models/
 │   └── suhu_converter.dart
 ├── pages/
@@ -27,76 +32,54 @@ lib/
 
 Keterangan:
 
-- `main.dart`: entry point aplikasi dan konfigurasi tema.
-- `models/suhu_converter.dart`: berisi enum satuan suhu, model hasil konversi, dan logika konversi.
-- `pages/home_page.dart`: berisi tampilan utama dan pengelolaan input pengguna.
-- `widgets/hasil_card.dart`: widget reusable untuk menampilkan hasil konversi.
-
-## Konsep Modular yang Diterapkan
-
-Refactor dilakukan agar kode lebih clean dan maintainable:
-
-- Logika konversi dipindahkan ke file khusus agar mudah diuji.
-- Widget hasil dibuat terpisah agar tidak ada pengulangan tampilan.
-- Halaman utama hanya menangani alur input, aksi tombol, dan render UI.
-- Penggunaan enum `SatuanSuhu` membuat kode lebih aman dibanding string literal di banyak tempat.
+- **`bloc/`**: Berisi tiga lapis komponen state management. Event menyimpan interaksi pengguna. State mendefinisikan keadaan aplikasi (satuan terpilih, hasil konversi, pesan error). BLoC menjembatani Event ke dalam perhitungan di Model untuk memproduksi State baru.
+- **`models/suhu_converter.dart`**: Berisi algoritma konversi numerik murni.
+- **`pages/home_page.dart`**: UI utama yang bodoh (stateless dalam konteks perhitungan), bertugas melempar Event dan merespon State BLoC menggunakan `BlocBuilder`.
+- **`widgets/hasil_card.dart`**: Widget modular yang disajikan berulang untuk setiap satuan suhu.
 
 ## Logika Kalkulator Konversi
 
-Logika utama aplikasi berada pada file `models/suhu_converter.dart`. Proses konversi dilakukan dengan pendekatan satu titik acuan, yaitu Celsius.
+Semua proses konversi terpusat menggunakan model referensi absolut yaitu **Celsius**. 
 
-Alurnya sebagai berikut:
+1. Menyerap data input dan mengidentifikasi satuan awal.
+2. Mengonversi ke titik tumpu (Celsius).
+3. Mendistribusikan titik tumpu Celsius itu masing-masing ke Fahrenheit, Kelvin, dan Reamur sekaligus.
 
-1. Pengguna memasukkan sebuah nilai suhu.
-2. Pengguna memilih satuan input: Celsius, Fahrenheit, Kelvin, atau Reamur.
-3. Nilai input terlebih dahulu dikonversi ke Celsius.
-4. Dari nilai Celsius tersebut, aplikasi menghitung seluruh hasil konversi ke satuan lain.
-5. Hasil akhir ditampilkan dalam empat kartu hasil.
+Rumus Matematika:
+- Ke Celsius: `F: (F - 32) * 5 / 9` | `K: K - 273.15` | `R: R * 5 / 4`
+- Dari Celsius: `F: (C * 9 / 5) + 32` | `K: C + 273.15` | `R: C * 4 / 5`
 
-Pendekatan ini dipilih karena lebih sederhana dan mudah dirawat. Dibandingkan membuat rumus untuk setiap pasangan satuan, aplikasi cukup:
+## Pengujian (Testing) & Code Coverage
 
-- mengubah semua input ke Celsius terlebih dahulu,
-- lalu menghitung Celsius, Fahrenheit, Kelvin, dan Reamur dari satu nilai dasar yang sama.
+Proyek ini telah menerapkan _Test-Driven Development (TDD)_ parsial dengan hasil liputan kode (**Code Coverage**) di atas **90%**. Terdapat 3 tahapan test utama yang diletakkan pada folder `test/`:
+1. **Model Tests** (`test/models/suhu_converter_test.dart`): Verifikasi validitas rumus algoritma matematika.
+2. **BLoC Tests** (`test/bloc/konversi_suhu_bloc_test.dart`): Menguji _state transition_ berdasarkan _event_.
+3. **Widget Tests** (`test/widget_test.dart`): Uji fungsionalitas UI komponen Visual dan alur interaksi ketikan input _mocking_.
 
-Rumus yang digunakan:
+## Cara Menjalankan Aplikasi & Tes
 
-- Fahrenheit ke Celsius: `(F - 32) * 5 / 9`
-- Kelvin ke Celsius: `K - 273.15`
-- Reamur ke Celsius: `R * 5 / 4`
-- Celsius ke Fahrenheit: `(C * 9 / 5) + 32`
-- Celsius ke Kelvin: `C + 273.15`
-- Celsius ke Reamur: `C * 4 / 5`
+Pastikan Flutter SDK terpasang di sistem.
 
-Contoh alur:
-
-- Jika pengguna memasukkan `100` dengan satuan `Celsius`, maka nilai dasar Celsius adalah `100`.
-- Dari nilai tersebut, aplikasi menghitung:
-- Fahrenheit = `212`
-- Kelvin = `373.15`
-- Reamur = `80`
-
-
-## Cara Menjalankan Aplikasi
-
-1. Pastikan Flutter SDK sudah terpasang.
-2. Masuk ke folder proyek:
-
+1. **Jalankan Aplikasi:**
 ```bash
-cd konversi_suhu
-```
-
-3. Jalankan aplikasi:
-
-```bash
+flutter pub get
 flutter run
 ```
 
-## Hasil Pengujian
+2. **Jalankan Analisis Kode Statis (Linter):**
+```bash
+flutter analyze
+```
 
-Pengujian dilakukan dengan dua tahap:
+3. **Jalankan Pengujian Otomatis:**
+```bash
+flutter test
+```
 
-- `flutter analyze`
-- `flutter test`
+4. **Jalankan Pengujian dengan Coverage Laporan:**
+```bash
+flutter test --coverage
+```
 
 Status terakhir:
 
