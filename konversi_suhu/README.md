@@ -2,11 +2,10 @@
 
 Aplikasi Flutter sederhana untuk mengonversi suhu antara berbagai satuan (Celsius, Fahrenheit, Kelvin, dan Reamur). Proyek ini telah direfactor menggunakan arsitektur **Clean Code**, **BLoC State Management**, serta menerapkan **Unit, BLoC, dan Widget Tests** untuk menjamin kualitas aplikasi.
 
-## Update Terbaru: Firebase Authentication & Elegant UI (13 Mei 2026)
+## Firebase Authentication (13 Mei 2026)
 
 Proyek ini telah diperbarui dengan fitur keamanan dan antarmuka pengguna yang lebih premium:
 - **Firebase Authentication**: Implementasi fitur Login dan Register menggunakan Firebase Auth.
-- **Elegant UI Design**: Antarmuka pengguna baru yang modern menggunakan **Google Fonts (Poppins)**, *rounded corners*, dan efek bayangan (*soft shadows*).
 - **Auth State Management**: Penggunaan `StreamBuilder` untuk manajemen status login pengguna secara real-time.
 - **Service Layer**: Penambahan `AuthService` untuk pemisahan logika autentikasi dari UI.
 - **Enhanced UX**: Desain input field yang lebih interaktif dan kartu hasil yang lebih informatif.
@@ -106,9 +105,15 @@ Jenis pengujian yang digunakan:
 - Unit test untuk memastikan rumus konversi suhu benar.
 - Widget test untuk memastikan elemen UI tampil dan interaksi dasar berjalan.
 
-## Hasil Tampilan Aplikasi
+## Hasil Tampilan Aplikasi (UI Terbaru)
 
-Berikut dokumentasi hasil aplikasi dari folder `screenshots`:
+Berikut dokumentasi hasil aplikasi terbaru (Auth & Elegant UI):
+
+| Halaman Login | Halaman Utama (Update) | Notifikasi Login Gagal |
+| --- | --- | --- |
+| ![Login Page](screenshots/login-sukses.jpeg) | ![Main Page](screenshots/halaman-utama.jpeg) | ![Login Failed](screenshots/login-gagal.jpeg) |
+
+### Dokumentasi Konversi Suhu (UI Lama)
 
 | Input Celsius | Input Fahrenheit |
 | --- | --- |
