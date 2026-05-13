@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../bloc/konversi_suhu_bloc.dart';
 import '../bloc/konversi_suhu_event.dart';
 import '../bloc/konversi_suhu_state.dart';
 import '../models/suhu_converter.dart';
 import '../widgets/hasil_card.dart';
+import '../services/auth_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -31,9 +33,22 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Konversi Suhu'),
+        title: const Text(
+          'Konversi Suhu',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout_rounded, color: Colors.deepPurple),
+            onPressed: () async {
+              await AuthService().signOut();
+            },
+          ),
+          const SizedBox(width: 10),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -56,10 +71,20 @@ class _HomePageState extends State<HomePage> {
     return TextField(
       controller: _controller,
       keyboardType: TextInputType.number,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         labelText: 'Masukkan Suhu',
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(Icons.thermostat),
+        labelStyle: GoogleFonts.poppins(color: Colors.black54),
+        prefixIcon: const Icon(Icons.thermostat_outlined, color: Colors.deepPurple),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.black12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
+        ),
+        filled: true,
+        fillColor: Colors.grey[50],
       ),
     );
   }
@@ -69,19 +94,25 @@ class _HomePageState extends State<HomePage> {
       buildWhen: (previous, current) =>
           previous.satuanTerpilih != current.satuanTerpilih,
       builder: (context, state) {
-        return InputDecorator(
-          decoration: const InputDecoration(
-            labelText: 'Satuan Input',
-            border: OutlineInputBorder(),
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.black12),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<SatuanSuhu>(
-              isDense: true,
+              isExpanded: true,
               value: state.satuanTerpilih,
+              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.deepPurple),
               items: SatuanSuhu.values
                   .map((s) => DropdownMenuItem(
                         value: s,
-                        child: Text(SuhuConverter.labels[s]!),
+                        child: Text(
+                          SuhuConverter.labels[s]!,
+                          style: GoogleFonts.poppins(),
+                        ),
                       ))
                   .toList(),
               onChanged: (value) {
@@ -99,11 +130,23 @@ class _HomePageState extends State<HomePage> {
   Widget _buildKonversiButton() {
     return SizedBox(
       width: double.infinity,
+      height: 55,
       child: ElevatedButton(
         onPressed: _konversi,
-        child: const Text(
-          'Konversi',
-          style: TextStyle(fontSize: 18),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.deepPurple,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
+        ),
+        child: Text(
+          'Konversi Sekarang',
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
@@ -117,7 +160,7 @@ class _HomePageState extends State<HomePage> {
             child: Center(
               child: Text(
                 state.errorMessage,
-                style: const TextStyle(color: Colors.red),
+                style: GoogleFonts.poppins(color: Colors.redAccent, fontWeight: FontWeight.w500),
               ),
             ),
           );
@@ -125,16 +168,36 @@ class _HomePageState extends State<HomePage> {
 
         final hasil = state.hasilKonversi;
         if (hasil == null) {
-          return const Expanded(
+          return Expanded(
             child: Center(
-              child: Text('Masukkan suhu dan tekan Konversi'),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.query_stats_rounded, size: 60, color: Colors.grey[300]),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Masukkan suhu dan tekan Konversi',
+                    style: GoogleFonts.poppins(color: Colors.black38),
+                  ),
+                ],
+              ),
             ),
           );
         }
 
         return Expanded(
           child: ListView(
+            padding: const EdgeInsets.only(top: 10),
             children: [
+              Text(
+                'Hasil Konversi',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 15),
               HasilCard(nama: 'Celsius (°C)', nilai: hasil.celsius),
               HasilCard(nama: 'Fahrenheit (°F)', nilai: hasil.fahrenheit),
               HasilCard(nama: 'Kelvin (K)', nilai: hasil.kelvin),

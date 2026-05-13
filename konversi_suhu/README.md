@@ -2,6 +2,16 @@
 
 Aplikasi Flutter sederhana untuk mengonversi suhu antara berbagai satuan (Celsius, Fahrenheit, Kelvin, dan Reamur). Proyek ini telah direfactor menggunakan arsitektur **Clean Code**, **BLoC State Management**, serta menerapkan **Unit, BLoC, dan Widget Tests** untuk menjamin kualitas aplikasi.
 
+## Update Terbaru: Firebase Authentication & Elegant UI (13 Mei 2026)
+
+Proyek ini telah diperbarui dengan fitur keamanan dan antarmuka pengguna yang lebih premium:
+- **Firebase Authentication**: Implementasi fitur Login dan Register menggunakan Firebase Auth.
+- **Elegant UI Design**: Antarmuka pengguna baru yang modern menggunakan **Google Fonts (Poppins)**, *rounded corners*, dan efek bayangan (*soft shadows*).
+- **Auth State Management**: Penggunaan `StreamBuilder` untuk manajemen status login pengguna secara real-time.
+- **Service Layer**: Penambahan `AuthService` untuk pemisahan logika autentikasi dari UI.
+- **Enhanced UX**: Desain input field yang lebih interaktif dan kartu hasil yang lebih informatif.
+- **Logout Feature**: Memungkinkan pengguna keluar dari aplikasi dengan aman.
+
 ## Fitur Utama
 
 - Input suhu menggunakan `TextField`.
@@ -25,7 +35,11 @@ lib/
 ├── models/
 │   └── suhu_converter.dart
 ├── pages/
-│   └── home_page.dart
+│   ├── home_page.dart
+│   ├── login_page.dart
+│   └── register_page.dart
+├── services/
+│   └── auth_service.dart
 └── widgets/
 	└── hasil_card.dart
 ```
@@ -34,8 +48,9 @@ Keterangan:
 
 - **`bloc/`**: Berisi tiga lapis komponen state management. Event menyimpan interaksi pengguna. State mendefinisikan keadaan aplikasi (satuan terpilih, hasil konversi, pesan error). BLoC menjembatani Event ke dalam perhitungan di Model untuk memproduksi State baru.
 - **`models/suhu_converter.dart`**: Berisi algoritma konversi numerik murni.
-- **`pages/home_page.dart`**: UI utama yang bodoh (stateless dalam konteks perhitungan), bertugas melempar Event dan merespon State BLoC menggunakan `BlocBuilder`.
-- **`widgets/hasil_card.dart`**: Widget modular yang disajikan berulang untuk setiap satuan suhu.
+- **`pages/`**: Berisi halaman-halaman aplikasi. `home_page.dart` untuk konversi, `login_page.dart` dan `register_page.dart` untuk autentikasi.
+- **`services/auth_service.dart`**: Menangani interaksi langsung dengan Firebase Authentication.
+- **`widgets/hasil_card.dart`**: Widget modular yang disajikan berulang untuk setiap satuan suhu dengan desain yang telah diperbarui.
 
 ## Logika Kalkulator Konversi
 
